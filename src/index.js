@@ -93,6 +93,8 @@ class App extends React.Component {
 
       this.watchWalletTimer  = setInterval(() => this.watchWallet(), 500);
       this.watchNetworkTimer = setInterval(() => this.watchNetwork(), 500);
+      //this.watchWallet();
+     // this.watchNetwork();
   }
 
   watchWallet() {
@@ -151,8 +153,8 @@ class App extends React.Component {
   }
 
   hireAgent(agent) {
-    console.log("Agent " + agent.name + " selected");
-    
+  
+    console.log(agent.name)
     this.setState({
       selectedAgent: agent,
       serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
@@ -164,29 +166,19 @@ class App extends React.Component {
 
     return (
       <div>
-        <Layout style={{ minHeight: '100vh' }} >
-          <Layout.Header style={{ background: 'rgb(35, 13, 58)' }}>
-            <img src="/img/logo.svg" alt="SingularityNET" />
-          </Layout.Header>
-          <Layout.Content>
-            <Row type="flex" justify="center" style={{ marginTop: '40px' }}>
-              <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
-                <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
-                <Divider/>
-                <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
-                <Divider/>
-                { this.state.usingDefaultCallComponent &&
+       
+        <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract}
+        ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance}
+        onAgentClick={(agent) => this.hireAgent(agent)} />
+        { this.state.usingDefaultCallComponent &&
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
-                }
-                {
+        }
+        {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
                   <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
-                }
-              </Col>
-            </Row>
-          </Layout.Content>
-          <Layout.Footer style={{ textAlign: 'center' }} >SingularityNET</Layout.Footer>
-        </Layout>
+        }
+   
+       
       </div>
     );
   }

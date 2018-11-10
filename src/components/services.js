@@ -1,63 +1,78 @@
 import React from 'react';
 import Eth from 'ethjs';
-import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table} from 'antd';
 import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS, STRINGS} from '../util';
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
+import Pagination from "material-ui-flat-pagination";
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import Popup from 'reactjs-popup';
+import Account from "./account.js";
+import Popover from 'react-simple-popover';
 
 
+const theme = createMuiTheme({
+  overrides: {
+    // Name of the component ⚛️ / style sheet
+    MuiButton: {
+      // Name of the rule
+      root: {
+        // Some CSS
+        background: 'white',
+        borderRadius: 3,
+        border: 0,
+        color: 'white',
+        height: 48,
+        padding: '0 30px',
+        boxShadow: '0 3px 5px 2px lightblue',
+      },
+    },
+  },
+});
 class Services extends React.Component {
 
   constructor(props) {
     super(props);
 
+    
     this.state = {
       agents : [],
       selectedAgent: undefined,
+      offset:0,
+      open:false,
+      visible:false
+     
     };
 
-    this.servicesTableKeys = [
-      {
-        title:      'Agent',
-        dataIndex:  'name',
-        width:      200,
-      },
-      {
-        title:      'Contract Address',
-        dataIndex:  'address',
-        width:      '20ch',
-        render:     (address, agent, index) =>
-          this.props.network &&
-          <Tag>
-            <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${address}` : undefined}>
-              {FORMAT_UTILS.toHumanFriendlyAddressPreview(address)}
-            </a>
-          </Tag>
-      },
-      {
-        title:      'Current Price',
-        dataIndex:  'currentPrice',
-        render:     (currentPrice, agent, index) => `${AGI.toDecimal(currentPrice)} AGI`,
-      },
-      {
-        title:      'Agent Endpoint',
-        dataIndex:  'endpoint',
-        width: '23ch'
-      },
-      {
-        title:      '',
-        dataIndex:  'state',
-        render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof this.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: agent }); return this.props.onAgentClick(agent); }} >
-            { this.getAgentButtonText(state, agent) }
-          </Button>
-        }
-    ].map(column => Object.assign({}, { width: 150 }, column));
-
+    
     this.watchRegistriesTimer = undefined;
+    this.openModal = this.openModal.bind(this)
+    this.closeModal = this.closeModal.bind(this)
+
+    this.openModal1 = this.openModal1.bind(this)
+    this.closeModal1 = this.closeModal1.bind(this)
+   
+  }
+
+
+  openModal (){
+    this.setState({ open: true })
+  }
+  closeModal () {
+    this.setState({ open: false })
+  }
+
+  openModal1 (){
+    this.setState({ visible: true })
+  }
+  closeModal1 () {
+    this.setState({ visible: false })
   }
 
   getAgentButtonText(state, agent) {
+    
+    
     if (this.props.account) {
-      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.key !== agent.key) {
+      if (typeof state.selectedAgent === 'undefined' || state.selectedAgent.key !== agent.key) {
         return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
       } else {
         return 'Selected';
@@ -69,10 +84,12 @@ class Services extends React.Component {
 
   componentWillMount() {
     this.watchRegistriesTimer = setInterval(() => this.watchRegistries(), 500);
+    //this.watchRegistries()
   }
 
   componentWillUnmount() {
     clearInterval(this.watchRegistriesTimer);
+  // this.watchRegistries()
   }
 
   hexToAscii(hexString) { 
@@ -197,62 +214,221 @@ class Services extends React.Component {
     }
   }
 
+  handleClick(offset) {
+    this.setState({ offset });
+  }
+
+
   render() {
-
-    let servicesTable = (columns, dataSource, featured) =>
-      <React.Fragment>
-        {/* featured ? <h5><Icon type="star" /> Featured</h5> : <h5>Other</h5> */}
-        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 20} dataSource={dataSource} />
-        <br/>
-      </React.Fragment>
     
-    /* All services go in one table for now
-    let featuredServices = () => servicesTable(this.servicesTableKeys, this.state.agents.featured, true)
-    let otherServices = () => servicesTable(this.servicesTableKeys, this.state.agents.other)
-    */
-    // TODO: destroy the allServices table once we go live with the Featured agents distinction
-    let allServicesList = () => {
-      const serviceInOrg = name => name.split("/").length > 1;
-      return Object.values(this.state.agents)
-        .reduce((acc, cur) => cur.length !== 0 ? acc.concat(cur) : acc, [])
-        .sort((a, b) => {
-          const aInOrg = serviceInOrg(a.name);
-          const bInOrg = serviceInOrg(b.name);
-          if (aInOrg !== bInOrg) {
-            return bInOrg - aInOrg;
-          } else {
-            return a.name.localeCompare(b.name);
-          }
-        });
-    };
+    let otheragents = Object.values(this.state.agents);
+    let featuredagents = otheragents.splice(0,1); //featured agents
+    console.log(otheragents)
+    let arraylimit = otheragents.map(row => row.length)
+    let kyid = 0
+    const agents = otheragents.map(row => row.slice(this.state.offset, this.state.offset + 5).map(rown => <div className="media d-flex flex-row p-3 border bg-light mb-3" key={kyid++}>
+    <div className="col-3 align-self-center" >
+    <a href="#"  className="link-agent-details d-block" onClick={this.openModal1}> 
+                      <img className="mr-3 img rounded-circle" src="img/agent.png" alt="Generic placeholder img"/>
+                      <span className="m-0">{rown.name.toUpperCase()}</span>
+                      </a>
+        <Popover
+                    placement="right"
+                    container= {this}
+                    target={this.refs.endtarget}
+                    show={this.state.visible}
+                    onHide={this.closeModal1}
+                    hideWithOutsideClick={true}
+                    style={{width:'620px',height:'850px',left:'300px' }}>
+                  
 
-    let allServicesTable = () => servicesTable(this.servicesTableKeys, allServicesList())
+                  <div >
+                <a href="javascript:void(0)" className="closebtn" >&times;</a>
+                <div className="right-panel agentdetails-sec p-3 pb-5">
+                    <div className="name border-bottom m-2">
+                        <h3><span className="m-0">{rown.name.toUpperCase()}</span></h3>
+                        <p>Beta-Dapp Agent
+                            <a href="#" className="d-block">Expand</a></p>
+                        <button type="button" className="btn  btn-outline-primary btn-curved-singularity ">Tag name1</button>
+                        <button type="button" className="btn   btn-outline-primary btn-curved-singularity">Tag name2</button>
+                        <div className="button-startjob pt-1 pb-3 d-flex justify-content-end">
+                        <Button variant="contained"  color={rown.state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(rown.state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof rown.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: rown }); return this.props.onAgentClick(rown); }} >
+                            { this.getAgentButtonText(rown.state, rown.agent) }
+                        </Button>                                         
+                        </div>
+
+                    </div>
+                    <div className="address border-bottom m-2 pb-3">
+                        <h3 className="pt-3">Contract address</h3>
+                        <div className="row">
+                            <div className="col-6">
+                                <p> <label className="m-0">
+                              <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${rown.address}` : undefined}>
+    
+                                {FORMAT_UTILS.toHumanFriendlyAddressPreview(rown.address)}</a>
+                              </label> </p>
+                            </div>
+                            <div className="col-6 text-center border-left"><i className="fas fa-user"></i>
+                                <p className="text-uppercase">Developer Name</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="jobcostpreview border-bottom m-2">
+                        <h3 className="pt-3">Job Cost Preview</h3>
+
+                        <div className="container p-3">
+                            <div className="row mb-1">
+                                <div className="col-sm bg-light p-2">
+                                    Current Price
+                                </div>
+                                <div className="col-sm text-right bg-lighter ">
+                                <label className="m-0">{AGI.toDecimal(rown.currentPrice)}  ETH</label>
+                                </div>
+
+                            </div>
+                            <div className="row">
+                                <div className="col-sm bg-light  p-2">
+                                    End Point
+                                </div>
+                                <div className="col-sm text-right bg-lighter ">
+                                    <label className="m-0">{rown.endpoint} </label>
+                                    
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div className="agenthealth border-bottom m-2">
+                        <h3 className="pt-3">Agent Health</h3>
+                        <div className="d-flex chart p-3">
+                            <img src="img/chart-dummy.png" title="chart" className="img img-responsive" />
+
+                        </div>
+                    </div>
+                    <div className="input m-2">
+                        <h3 className="pt-3">Input Sample</h3>
+                        <form>
+                            <div className="form-group">
+
+                                <textarea className="form-control" id="exampleFormControlTextarea1" rows="3" style={{width:"100%"}}></textarea>
+                            </div>
+                        </form>
+
+                    </div>
+                    <div className="input m-2">
+                        <h3 className="pt-3">Output Sample</h3>
+                        <form>
+                            <div className="form-group">
+
+                                <textarea className="form-control" id="exampleFormControlTextarea1" rows="3" style={{width:"100%"}}></textarea>
+                            </div>
+                        </form>
+                        <button type="button" className="btn btn-lg  btn-outline-primary btn-curved-singularity align-self-right">Run
+                            Sample</button>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+                   
+                
+                  </Popover>
+
+    </div>
+    <div className="col-3 align-self-center">
+
+  <label className="m-0">{AGI.toDecimal(rown.currentPrice)}  ETH</label>
+</div>
+
+ 
+
+
+    </div>))
 
     return(
-      <Card title={
-        <React.Fragment>
-          <Icon type="table" />
-          <Divider type="vertical"/>
-            Agents
-        </React.Fragment> }>
-        {/* TODO: Destroy the allServices table rendering once we go live with the Featured agents distinction, restore the two tables */} 
-        {
-          this.state.agents
-          && (
-            (this.state.agents.featured && this.state.agents.featured.length !== 0)
-            || (this.state.agents.other && this.state.agents.other.length !== 0)
-          )
-          && allServicesTable()
-        }
-        {
-          /*
-          {this.state.agents.featured && this.state.agents.featured.length !== 0 && featuredServices()}
-          {this.state.agents.other && this.state.agents.other.length !== 0 && otherServices()}
-          */
-        }
-      </Card>
+    <React.Fragment>
+
+      <nav className="site-header sticky-top py-1">
+            <div className="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center">
+              <div className="logo-wrapper ">
+                <a href="#"><i className="icon-logo-singularity"></i></a>
+              </div>
+
+                <div className="header-right-pnl  d-flex  justify-content-around">
+                    <div className="seach-pnl d-flex  justify-content-around align-items-center ">
+                        <a className="btn-discover btn btn-primary mr-4" href="#">Discover</a>
+    
+                        <form className="navbar-form pl-4 " role="search" refs ="endtarget">
+                            <div className="input-group add-on">
+                                <input className="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text"/>
+                                <div className="input-group-btn">
+                                    <button type="button" className="btn-search-pop btn btn-lg " >
+                                    <i className="fa fa-search"></i>
+                                    </button>
+    
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div className="loggeduser-pnl" >
+                    <Popup
+                    open={this.state.open}
+                    trigger = {  <IconButton color="inherit"  onClick={this.openModal}>
+                    <img className="user-img rounded-circle m-2" src="img/user.png"/>
+                    </IconButton>}
+                    closeOnDocumentClick
+                    onClose={this.closeModal}
+                    position="left top" offsetX="10"  contentStyle={{width:'420px'}}>
+                  
+                    <Account network={this.props.network} account={this.props.account} ethBalance={this.props.ethBalance} agiBalance={this.props.agiBalance} />
+                
+                  </Popup>
+                      
+                    </div>
+                </div>
+                </div>
+        </nav>
+
+
+
+<main role="content" className="content-area">
+<div className="container-fluid p-4  ">
+      <div className="justify-content-between p3">
+                <h4 className="align-self-center text-uppercase mb-0 ">All Agents</h4>
+                
+      <div>
+        {agents}
+     <div className="pagination pagination-singularity  pt-3 d-flex justify-content-end">
+      <MuiThemeProvider theme={theme}> 
+        <Pagination
+          limit={5}
+          offset={this.state.offset}
+          total={arraylimit}
+          onClick={(e, offset) => this.handleClick(offset)}
+        />
+     </MuiThemeProvider>
+     </div>
+     </div>
+     </div>
+</div>
+
+
+    </main>
+
+  
+ 
+   
+    </React.Fragment>
+           //allServicesTable()
     )
-  }
+   
+
+}
 }
 
 export default Services;

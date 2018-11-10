@@ -19,11 +19,12 @@ class Account extends React.Component {
             Account
           </React.Fragment>
         }
+        style={{width:'400px'}}
         extra={
           <Button size="small" type="primary" href="https://faucet.singularitynet.io" target="_blank">
             Get Kovan AGI
           </Button>
-        }>
+        } >
         { !this.props.account ?
           <Alert message="Unlock MetaMask and select the Kovan network to interact with the SingularityNET Alpha Dapp" type="info" showIcon />
           :
