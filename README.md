@@ -1,29 +1,14 @@
-# AGI Alpha Dapp
+# AGI Beta Dapp
+The Beta Dapp is work in progress. It has the landing page from mockup and integrated with https://ltgukzuuck.execute-api.us-east-1.amazonaws.com/stage/service
 
-This Dapp allows you to browse the list of SingularityNET Agents from the SingularityNET Registry and call them to provide a Service.
+This Dapp allows you to browse the list of SingularityNET Agents from the https://ltgukzuuck.execute-api.us-east-1.amazonaws.com/stage/service and call them to provide a Service (not included in this version)
 The Dapp uses the SingularityNET contracts deployed on the Kovan testnet.
 
 To get Kovan AGI to use the Dapp you can use the official [SingularityNET AGI Faucet](https://faucet.singularitynet.io/).
 To get Kovan ETH to pay for gas costs you should refer to [this repo](https://github.com/kovan-testnet/faucet).
 
 ## How to call a Service
-The DApp can currently only interact with services that match the API of the example service. This will change in the future as we support a generic mechanism to declaratively describe a service's API. In the interim, steps [11, 14] are specific to the example service's input and output format.  
-These instructions can also be found at the [SingularityNET Community Wiki](https://github.com/singnet/wiki/wiki/Getting-Started-%5BAlpha%5D#calling-a-service-using-the-dapp)
-
-1. Get [Ether](https://github.com/kovan-testnet/faucet) and [AGI](https://faucet.singularitynet.io/) on the Kovan network
-2. Navigate to the SingularityNET alpha [dapp](http://alpha.singularitynet.io/)
-3. Unlock MetaMask
-4. Click the "Create Job" button to the right of the "Alpha TensorFlow Agent"
-5. Click the "Create Job Contract" button at the bottom of the "Job" pane
-6. Click the "SUBMIT" button in the "CONFIRM TRANSACTION" dialogue
-7. Click the "Approve AGI Transfer" button at the bottom of the "Job" pane
-8. Click the "SUBMIT" button in the "CONFIRM TRANSACTION" dialogue
-9. Click the "Fund Job Contract" button at the bottom of the "Job" pane
-10. Click the "SUBMIT" button in the "CONFIRM TRANSACTION" dialogue
-11. Use the file uploader to upload an image of your choice
-12. Click the "Call Agent API" button at the bottom of the "Job" pane
-13. Click the "Sign" button in the "CONFIRM TRANSACTION" dialogue
-14. View the predictions and confidences for the image classification in the "Job" pane
+Steps for Integration with service come later...
 
 ## Development instructions
 * Install [Node.js and npm](https://nodejs.org/)
