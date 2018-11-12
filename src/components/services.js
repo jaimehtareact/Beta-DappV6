@@ -10,6 +10,7 @@ import Account from "./account.js";
 import Popover from 'react-simple-popover';
 
 
+
 const theme = createMuiTheme({
   overrides: {
     // Name of the component ⚛️ / style sheet
@@ -220,7 +221,18 @@ class Services extends React.Component {
 
 
   render() {
-    
+    /*Agents name*/
+    let agentsample =[ {
+      'agentname':'Face_Recognition',price:'0.01'
+    },
+    {
+      'agentname':'Document_Recognition',price:'0.00001'
+    },
+    {
+      'agentname':'Text_Recognition',price:'0.0001'
+    }
+  ]
+  /*sample agents name*/
     let otheragents = Object.values(this.state.agents);
     let featuredagents = otheragents.splice(0,1); //featured agents
     console.log(otheragents)
@@ -232,16 +244,14 @@ class Services extends React.Component {
                       <img className="mr-3 img rounded-circle" src="img/agent.png" alt="Generic placeholder img"/>
                       <span className="m-0">{rown.name.toUpperCase()}</span>
                       </a>
-        <Popover
+    </div>
+    <Popover
                     placement="right"
                     container= {this}
-                    target={this.refs.endtarget}
                     show={this.state.visible}
                     onHide={this.closeModal1}
                     hideWithOutsideClick={true}
-                    style={{width:'620px',height:'850px',left:'300px' }}>
-                  
-
+                    style={{width:'620px',height:'850px' }}>
                   <div >
                 <a href="javascript:void(0)" className="closebtn" >&times;</a>
                 <div className="right-panel agentdetails-sec p-3 pb-5">
@@ -333,13 +343,9 @@ class Services extends React.Component {
                 </div>
 
             </div>
+      </Popover>
 
 
-                   
-                
-                  </Popover>
-
-    </div>
     <div className="col-3 align-self-center">
 
   <label className="m-0">{AGI.toDecimal(rown.currentPrice)}  ETH</label>
@@ -412,6 +418,7 @@ class Services extends React.Component {
           onClick={(e, offset) => this.handleClick(offset)}
         />
      </MuiThemeProvider>
+     
      </div>
      </div>
      </div>

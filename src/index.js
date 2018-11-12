@@ -10,7 +10,7 @@ import tokenAbi from 'singularitynet-token-contracts/abi/SingularityNetToken.jso
 import agentAbi from 'singularitynet-platform-contracts/abi/Agent.json';
 import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd';
 import Account from './components/account';
-import Services from './components/services';
+import SampleServices from './components/SampleServices';
 import Job from './components/job';
 import { NETWORKS, AGI, ERROR_UTILS } from './util';
 
@@ -167,7 +167,7 @@ class App extends React.Component {
     return (
       <div>
        
-        <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract}
+        <SampleServices account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract}
         ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance}
         onAgentClick={(agent) => this.hireAgent(agent)} />
         { this.state.usingDefaultCallComponent &&
