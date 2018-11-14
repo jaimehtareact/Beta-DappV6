@@ -154,7 +154,7 @@ class App extends React.Component {
 
   hireAgent(agent) {
   
-    console.log(agent.name)
+    
     this.setState({
       selectedAgent: agent,
       serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
