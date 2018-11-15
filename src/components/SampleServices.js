@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Eth from 'ethjs';
 import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS, STRINGS} from '../util';
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
@@ -16,6 +17,9 @@ import ThumbDown from '@material-ui/icons/thumbdown';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import VolumeDown from '@material-ui/icons/VolumeDown';
 import Chip from '@material-ui/core/Chip';
+import Slide from '@material-ui/core/Slide';
+import InputBase from '@material-ui/core/InputBase';
+import { withStyles } from '@material-ui/core/styles';
 
 const ModalStyles={
   position:'relative',
@@ -29,6 +33,33 @@ const ModalStyles={
   boxShadow: '0 3px 5px 2px gray',
   left: 1420,
   top:75,
+}
+
+const ModalStyles1={
+  position:'relative',
+  background: 'white',
+  borderRadius: 3,
+  border: 5,
+  color: 'white',
+  height: 930,
+  width: 450,
+  padding: '0 30px',
+  boxShadow: '0 3px 5px 2px gray',
+  left: 1480,
+  top:65,
+}
+const ModalStyles2={
+  position:'relative',
+  background: 'white',
+  borderRadius: 3,
+  border: 5,
+  color: 'white',
+  height: 190,
+  width: 1850,
+  padding: '0 30px',
+  boxShadow: '0 3px 5px 2px gray',
+  left: 20,
+  top:69,
 }
 
 const profilestyle={
@@ -64,24 +95,33 @@ class SampleServices extends React.Component {
       divclicker: 0,
       open:false,
       open1:false,
+      open2:false,
       userprofile:[],
       uservote:[],
-      useraddress:'',
       userservicestatus:[],
       serviceid:0,
+      modaluser:{},
+      tagsall:[],
+      searchterm:'',
+      bestestsearchresults:[],
+  
      
     };
-    //this.handledivclick = this.handledivclick.bind(this)
-    this.onOpenModal = this.onOpenModal.bind(this)
-    this.onCloseModal = this.onCloseModal.bind(this)
-   // this.handleProfile = this.handleProfile.bind(this)
+    
+   this.onOpenModal = this.onOpenModal.bind(this)
+   this.onCloseModal = this.onCloseModal.bind(this)
    this.onOpenModal1 = this.onOpenModal1.bind(this)
    this.onCloseModal1 = this.onCloseModal1.bind(this)
+   this.onOpenModal2 = this.onOpenModal2.bind(this)
+   this.onCloseModal2 = this.onCloseModal2.bind(this)
+   this.handlesearch = this.handlesearch.bind(this)
+   this.startjob = this.startjob.bind(this)
+   this.CaptureSearchterm = this.CaptureSearchterm.bind(this)
     
   }
   componentDidMount(){
 
-    this.setState({useraddress:'0xCasddedeasdadaddaddaddad'})
+    this.setState({useraddress:this.props.account})
     let _url = 'https://ltgukzuuck.execute-api.us-east-1.amazonaws.com/stage/service'
     fetch(_url,{'mode':'cors',
     'Access-Control-Allow-Origin':'*'})
@@ -144,21 +184,63 @@ class SampleServices extends React.Component {
   onCloseModal(){
     this.setState({ open: false });
   };
-  onOpenModal1(e) {
+  onOpenModal1(e,data) {
+  
+    this.setState({tagsall:data["tags"]})
+    this.setState({modaluser:data})
+  
     this.setState({ open1: true });
-    alert(e.target.id)
-  };
+  }
+
   onCloseModal1(){
     this.setState({ open1: false });
   };
+  onOpenModal2(e) {
+    //alert(e.target.id)
+    
+    this.setState({ open2: true });
+    
+  };
+  onCloseModal2(){
+    this.setState({ open2: false });
+  };
+  startjob()
+  {
+    alert("starting the job..." + this.state.serviceid)
+    
+  }
+  handlesearch()
+  {
+    
+    //search on service_name, display_name and all tags//
+    
+     let searchedagents =[]
+     searchedagents =this.state.agents.map(row => (row["display_name"].toUpperCase().indexOf(this.state.searchterm.toUpperCase()) !== -1 || row["service_name"].toUpperCase().indexOf(this.state.searchterm.toUpperCase()) !== -1)?row:null )
+     let bestsearchresults = [...(searchedagents.filter(row => row !== null).map(row1 => row1))]
+     this.setState({bestestsearchresults:bestsearchresults})
+   
+  }
+  CaptureSearchterm(e)
+  {
+    this.setState({searchterm:e.target.value})
+  }
   render() {
     /*Agents name*/
     const { open } = this.state;
-    let agentsample = this.state.agents
+    var agentsample = this.state.agents
+    
+    if (this.state.searchterm !== '' )
+    {
+      agentsample = this.state.bestestsearchresults
+    }
+    
+      
+    
     let uservotes = this.state.uservote
     let specificuser =  uservotes.filter(row => row.user_address === this.state.useraddress)
     let servicestatus = this.state.userservicestatus
     let arraylimit = agentsample.length
+    let strmutable = this.state.useraddress
     let _showthumbs = false
     let count =0
     let kyid = 0
@@ -172,17 +254,18 @@ class SampleServices extends React.Component {
   <div className="col-3 align-self-center">
     <label className="m-0">{rown["price"]}  ETH</label>
   </div>
+  
   <div className="col-3 align-self-center">
   {
+    //push new array of object has those upvote and downvote//
      specificuser.map(row =>  
       ((row["service_name"]===rown["service_name"] && row["organization_name"] === rown["organization_name"] )? 
                      (row["up_vote"] ===1)? <div><ThumbUp color="primary" style={{ fontSize: 20 }} /><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>:null ||
-                        (row["down_vote"]===1)?<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="secondary" style={{ fontSize: 20 }}/></div> :null||
-                        (row["up_vote"] === 0 && row["down_vote"] === 0)?<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>:null
+                        (row["down_vote"]===1)?<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="secondary" style={{ fontSize: 20 }}/></div> :null
                         :null
                          )
   )}
-
+<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>
 </div>
 
   <div className="col-3 align-self-center">
@@ -191,7 +274,7 @@ class SampleServices extends React.Component {
                              :null)
   )}
   <br/>
-  <Button variant="contained"  color="primary" onClick={this.onOpenModal1} id={rown["service_id"]}>Details</Button>
+  <Button variant="contained"  color="primary" onClick={(e)=>this.onOpenModal1(e,rown)} id={rown["service_id"]}>Details</Button>
 </div>
 
 </div>)
@@ -205,12 +288,13 @@ class SampleServices extends React.Component {
               </div>
                 <div className="header-right-pnl  d-flex  justify-content-around">
                     <div className="seach-pnl d-flex  justify-content-around align-items-center ">
-                        <a className="btn-discover btn btn-primary mr-4" href="#">Discover</a>   
+                         
                         <form className="navbar-form pl-4 " role="search" refs ="endtarget">
                             <div className="input-group add-on">
-                                <input className="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text"/>
+                                <input className="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text" value={this.state.searchterm} />
+                                
                                 <div className="input-group-btn">
-                                    <button type="button" className="btn-search-pop btn btn-lg " >
+                                    <button type="button" className="btn-search-pop btn btn-lg "  onClick={this.onOpenModal2} >
                                     <i className="fa fa-search"></i>
                                     </button>   
                                 </div>
@@ -220,7 +304,6 @@ class SampleServices extends React.Component {
                     <div className="loggeduser-pnl" >
                     <IconButton color="inherit" >
                     <img className="user-img rounded-circle m-2" src="img/user.png" onClick={this.onOpenModal}/>
-         
                     </IconButton>                     
                     </div>
                 </div>
@@ -260,26 +343,118 @@ class SampleServices extends React.Component {
                
             )}
              </Typography>
-           <Button variant="contained" onClick={this.onCloseModal} >Close</Button>
+           <Button variant="contained" color="secondary" onClick={this.onCloseModal} >Close</Button>
          </div>
        </Modal>
  </div>
  <div>
-      <Modal
+ 
+ <Modal
          open={this.state.open1}
          onClose={this.onCloseModal1}
        >
-         <div style={ModalStyles} >
-           <Typography variant="subtitle1" id="simple-modal-description1">
-           <div>do do do do do do do do do do </div>
+        
+           <Slide direction="left" in={this.state.open1} mountOnEnter unmountOnExit>
+         <div style={ModalStyles1} >
+           <Typography variant="subtitle1" id="simple-modal-description">
+           <div className="right-panel agentdetails-sec p-3 pb-5">
+                    <div className="name border-bottom m-2">
+                        <h3>{this.state.modaluser["service_name"]}</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id aliquet nulla, quis
+                            fringilla ex. Vivamus sodales maximus feugiat. Aliquam commodo..
+                            <a href="#" className="d-block">Expand</a></p>
+                           <p> {this.state.tagsall.map(rowtags => <button type="button" className="btn  btn-outline-primary btn-curved-singularity ">{rowtags}</button>)}</p>
+                          
+                        <div className="button-startjob pt-1 pb-3 d-flex justify-content-end"><button type="button" className="btn btn-singularity btn-md " onClick={this.startjob}>Start
+                                a
+                                Job</button></div>
+                    </div>
+                    <div className="address border-bottom m-2 pb-3">
+                        <h3 className="pt-3">User address</h3>
+                        <div className="row">
+                            <div className="col-6">
+                                <p> <label className="m-0">
+                              <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${this.props.account}` : undefined}>
+                              {this.props.account}
+                                </a>
+                              </label> </p>
+                            </div>
+                            <div className="col-6 text-center border-left">
+                                <p className="text-uppercase">{this.state.modaluser["organization_name"]}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="jobcostpreview border-bottom m-2">
+                        <h3 className="pt-3">Job Cost Preview</h3>
+
+                        <div className="container p-3">
+                            <div className="row mb-1">
+                                <div className="col-sm bg-light p-2">
+                                    Current Price
+                                </div>
+                                <div className="col-sm text-right bg-lighter ">
+                                {this.state.modaluser["price"]}
+                                </div>
+
+                            </div>
+                            <div className="row">
+                                <div className="col-sm bg-light  p-2">
+                                    Price Model
+                                </div>
+                                <div className="col-sm text-right bg-lighter ">
+                                {this.state.modaluser["price_model"]}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
              </Typography>
-           <Button onClick={this.onCloseModal1}>Close</Button>
+            
+           <Button variant="contained" color="secondary" onClick={this.onCloseModal1} >Close</Button>
          </div>
+         </Slide>
+        
        </Modal>
+      
+       
+ </div>
+ <div>
+ <Modal
+         open={this.state.open2}
+         onClose={this.onCloseModal2}
+       >
+        <Slide direction="down" in={this.state.open2} mountOnEnter unmountOnExit>
+         <div style={ModalStyles2} >
+           <Typography variant="subtitle1" id="simple-modal-description">
+           <div className='row'>
+                                            <div className='col rborder '> <form role='form'>
+                                                    <div className='form-group'> 
+                                                            <h3><label for='search' className='text-uppercase d-block'>Search</label></h3>
+                                                      <input className='headerSearch search-query form-control d-inline' id='str' name='str' type='text' value={this.state.searchterm} onChange={this.CaptureSearchterm} />                                                    
+                                                      <Button variant="contained" color="primary" onClick={this.handlesearch} >Search</Button>
+                                                     
+                                                    </div>
+                                                  </form></div>
+                                              
+                                            <div className='col ml-3'><h3>Tags</h3>
+                                            <nav className='tags-section'>
+                                            {this.state.agents.map(rowagents => rowagents["tags"].map(rowtag => <a className='btn btn-outline-primary btn-curved-singularity p-2 mr-3' href='#'>{rowtag}</a>))}
+                                                
+                                                      </nav></div>
+                                        </div>
+             </Typography>
+             <Button variant="contained" color="secondary" onClick={this.onCloseModal2} >Close</Button>
+         </div>
+         </Slide>
+       </Modal>
+
+       
  </div>
 </main> 
 </React.Fragment>       
     )
 }
 }
+
 export default SampleServices;
