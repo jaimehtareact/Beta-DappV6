@@ -104,6 +104,7 @@ class SampleServices extends React.Component {
       tagsall:[],
       searchterm:'',
       bestestsearchresults:[],
+      besttagresult:[],
   
      
     };
@@ -117,6 +118,7 @@ class SampleServices extends React.Component {
    this.handlesearch = this.handlesearch.bind(this)
    this.startjob = this.startjob.bind(this)
    this.CaptureSearchterm = this.CaptureSearchterm.bind(this)
+   this.handlesearchbytag = this.handlesearchbytag.bind(this)
     
   }
  
@@ -214,12 +216,27 @@ class SampleServices extends React.Component {
   {
     
     //search on service_name, display_name and all tags//
-    
+    this.setState({besttagresult:[]})
      let searchedagents =[]
      searchedagents =this.state.agents.map(row => (row["display_name"].toUpperCase().indexOf(this.state.searchterm.toUpperCase()) !== -1 || row["service_name"].toUpperCase().indexOf(this.state.searchterm.toUpperCase()) !== -1)?row:null )
      let bestsearchresults = [...(searchedagents.filter(row => row !== null).map(row1 => row1))]
      this.setState({bestestsearchresults:bestsearchresults})
    
+  }
+  handlesearchbytag(e,data)
+  {
+    //remove null//
+    let tagresult = []
+    
+    this.state.agents.map(rowagents => 
+    (rowagents["tags"].map(rowtag =>(rowtag===data)?tagresult.push(rowagents):null))
+   )
+    //inner loop trap//
+    this.setState({besttagresult:tagresult})
+  
+     //console.log(tagresult)
+     //later put this back in the this.state.agents here//
+     //check for status on tags later//
   }
   CaptureSearchterm(e)
   {
@@ -232,9 +249,15 @@ class SampleServices extends React.Component {
     
     if (this.state.searchterm !== '' )
     {
+      //this.setState({besttagresult:[]})
       agentsample = this.state.bestestsearchresults
     }
-    console.log(this.state.uservote)
+    
+    if (this.state.besttagresult.length>0)
+    {
+      //this.setState({searchterm:''})
+      agentsample = this.state.besttagresult
+    }
     
     let uservotes = [this.state.uservote]
    
@@ -376,8 +399,7 @@ class SampleServices extends React.Component {
            <div className="right-panel agentdetails-sec p-3 pb-5">
                     <div className="name border-bottom m-2">
                         <h3>{this.state.modaluser["service_name"]}</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id aliquet nulla, quis
-                            fringilla ex. Vivamus sodales maximus feugiat. Aliquam commodo..
+                        <p>Description for Agent here...
                             <a href="#" className="d-block">Expand</a></p>
                            <p> {this.state.tagsall.map(rowtags => <button type="button" className="btn  btn-outline-primary btn-curved-singularity ">{rowtags}</button>)}</p>
                           
@@ -446,7 +468,7 @@ class SampleServices extends React.Component {
            <div className='row'>
                                             <div className='col rborder '> <form role='form'>
                                                     <div className='form-group'> 
-                                                            <h3><label for='search' className='text-uppercase d-block'>Search</label></h3>
+                                                            <h3><label  className='text-uppercase d-block'>Search</label></h3>
                                                       <input className='headerSearch search-query form-control d-inline' id='str' name='str' type='text' value={this.state.searchterm} onChange={this.CaptureSearchterm} />                                                    
                                                       <Button variant="contained" color="primary" onClick={this.handlesearch} >Search</Button>
                                                      
@@ -455,7 +477,7 @@ class SampleServices extends React.Component {
                                               
                                             <div className='col ml-3'><h3>Tags</h3>
                                             <nav className='tags-section'>
-                                            {this.state.agents.map(rowagents => rowagents["tags"].map(rowtag => <a className='btn btn-outline-primary btn-curved-singularity p-2 mr-3' href='#'>{rowtag}</a>))}
+                                            {this.state.agents.map(rowagents => rowagents["tags"].map(rowtag => <a className='btn btn-outline-primary btn-curved-singularity p-2 mr-3' href='#' onClick={(e)=>{this.handlesearchbytag(e,rowtag)}}>{rowtag}</a>))}
                                                 
                                                       </nav></div>
                                         </div>
