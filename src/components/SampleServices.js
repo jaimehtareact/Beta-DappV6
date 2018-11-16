@@ -119,9 +119,10 @@ class SampleServices extends React.Component {
    this.CaptureSearchterm = this.CaptureSearchterm.bind(this)
     
   }
+ 
   componentDidMount(){
-
-    this.setState({useraddress:this.props.account})
+     this.setState({useraddress:this.props.account})
+    
     let _url = 'https://ltgukzuuck.execute-api.us-east-1.amazonaws.com/stage/service'
     fetch(_url,{'mode':'cors',
     'Access-Control-Allow-Origin':'*'})
@@ -155,9 +156,9 @@ class SampleServices extends React.Component {
     //user_address to change after metamask account address//
     )
     .then(res => res.json())
-    .then(data => this.setState({uservote:data}))
+   .then(data => this.setState({uservote:data}))
     .catch(err => console.log(err))
-
+//update existing//
   
 
   //fetch signal lite https://ltgukzuuck.execute-api.us-east-1.amazonaws.com/stage/fetch-service-status
@@ -233,14 +234,20 @@ class SampleServices extends React.Component {
     {
       agentsample = this.state.bestestsearchresults
     }
+    console.log(this.state.uservote)
     
-      
+    let uservotes = [this.state.uservote]
+   
     
-    let uservotes = this.state.uservote
-    let specificuser =  uservotes.filter(row => row.user_address === this.state.useraddress)
     let servicestatus = this.state.userservicestatus
     let arraylimit = agentsample.length
-    let strmutable = this.state.useraddress
+    agentsample.map(row => {row["up_vote"]=0,row["down_vote"]=0})
+    this.state.agents.map(row =>
+      this.state.uservote.map(rown => ((rown["service_name"]===row["service_name"]&& rown["organization_name"]===row["organization_name"])?
+                                         ((rown["up_vote"]===1?row["up_vote"]=1:row["up_vote"]=0)||(rown["down_vote"]===1?row["down_vote"]=1:row["down_vote"]=0)):null)
+ )
+ )
+
     let _showthumbs = false
     let count =0
     let kyid = 0
@@ -258,14 +265,23 @@ class SampleServices extends React.Component {
   <div className="col-3 align-self-center">
   {
     //push new array of object has those upvote and downvote//
-     specificuser.map(row =>  
-      ((row["service_name"]===rown["service_name"] && row["organization_name"] === rown["organization_name"] )? 
-                     (row["up_vote"] ===1)? <div><ThumbUp color="primary" style={{ fontSize: 20 }} /><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>:null ||
-                        (row["down_vote"]===1)?<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="secondary" style={{ fontSize: 20 }}/></div> :null
-                        :null
-                         )
-  )}
-<div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>
+   ((rown["up_vote"]===0 && rown["down_vote"]===0)?
+  
+      <div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="disabled" style={{ fontSize: 20 }}/></div>:
+      (rown["up_vote"]===1 && rown["down_vote"]===0)?
+  
+      <div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="primary" style={{ fontSize: 20 }}/></div>:
+    
+      (rown["up_vote"]===0 && rown["down_vote"]===1)?
+  
+      <div><ThumbUp color="disabled" style={{ fontSize: 20 }}/><ThumbDown color="secondary" style={{ fontSize: 20 }}/></div>:
+    
+      
+      null)
+    
+
+  }
+
 </div>
 
   <div className="col-3 align-self-center">
